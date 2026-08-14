@@ -15,18 +15,16 @@
 
 ## 安装教程
 
-### 方式一：从 npm 安装
+### 方式一：从 GitHub 安装（当前可用）
 
-如果只需要工作 / 生活分区：
-
-```sh
-dsh plugin --profile web add @linxin666/dsh-client-ui-wzone
-```
-
-如果同时需要任务看板、Git 图谱等插件，可以安装聚合包：
+当前版本从 GitHub 仓库安装：
 
 ```sh
-dsh plugin --profile web add @linxin666/dsh-web-ui-all
+git clone https://github.com/user27c/dsh-wzone.git
+cd dsh-wzone
+pnpm install
+pnpm build
+dsh plugin --profile web add link:$(pwd)
 ```
 
 安装完成后退出正在运行的 DSH，再重新启动：
@@ -45,7 +43,15 @@ macOS:            Cmd+Shift+R
 
 重启后，侧边栏中会出现「工作 / 生活」切换按钮。项目会按 DSH 工作区分组，会话数据由 DSH 提供，分区、置顶和归档偏好保存在浏览器本地。
 
-### 方式二：从 Git 仓库安装开发版
+### 方式二：从 npm 安装
+
+本仓库当前已发布到 GitHub，尚未发布到 npm。完成 npm 发布后，可直接使用：
+
+```sh
+dsh plugin --profile web add @linxin666/dsh-client-ui-wzone
+```
+
+### 本地开发
 
 ```sh
 git clone https://github.com/user27c/dsh-wzone.git
