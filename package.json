@@ -1,0 +1,62 @@
+{
+  "name": "@linxin666/dsh-client-ui-wzone",
+  "description": "工作/生活会话分区管理器：侧边栏按「工作/生活 → 项目 → 会话」三层管理会话，支持项目置顶/归档、会话顶置区、搜索与新建。",
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime"
+      ],
+      "platform": "web"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b && tsdown",
+    "prepare": "tsdown"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-ui-slots": "^0.1.0-rc.6",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@types/node": "^22.20.0",
+    "@types/react": "~18.3.1",
+    "lightningcss": "1.32.0",
+    "react": "^18.3.1",
+    "tsdown": "0.22.2",
+    "typescript": "~5.7.2"
+  },
+  "files": [
+    "lib",
+    "src",
+    "cordis.patch.yml",
+    "README.md",
+    "docs"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user27c/dsh-wzone.git"
+  }
+}

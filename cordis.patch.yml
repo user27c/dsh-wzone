@@ -1,0 +1,9 @@
+# dsh-wzone bundle patch: inserts the work/life zone session-browser plugin
+# row into the web profile roster. Applied as a profile bundle layer (the
+# `dsh.bundle.patch` manifest field). The row is a bare plugin by package name:
+# the node half (exports ".") runs in the host process (the /wzone route), and
+# the `dsh.client` declaration makes the browser half (exports "./client") load
+# in the web GUI.
+- insert:
+    - id: ui-wzone
+      name: '@linxin666/dsh-client-ui-wzone'
