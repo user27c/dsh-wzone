@@ -6,6 +6,33 @@
 import * as React from 'react'
 
 const STORE_KEY = 'dsh.wzone.v1'
+const STATUS_STORE_KEY = 'dsh.wzone.status.v1'
+
+function readCompletedStatuses() {
+  try {
+    const raw = localStorage.getItem(STATUS_STORE_KEY)
+    if (!raw) return {}
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) {
+      const result = {}
+      for (let i = 0; i < parsed.length; i++) result[parsed[i]] = true
+      return result
+    }
+    if (!parsed || typeof parsed !== 'object') return {}
+    if (Array.isArray(parsed.completed)) {
+      const result = {}
+      for (let i = 0; i < parsed.completed.length; i++) result[parsed.completed[i]] = true
+      return result
+    }
+    return parsed.completed && typeof parsed.completed === 'object' ? parsed.completed : {}
+  } catch (e) {
+    return {}
+  }
+}
+
+function writeCompletedStatuses(statuses) {
+  try { localStorage.setItem(STATUS_STORE_KEY, JSON.stringify({ completed: Object.keys(statuses) })) } catch (e) {}
+}
 
 function readStore() {
   try {
@@ -42,10 +69,10 @@ function timeAgo(ts) {
   try { return new Date(ts).toLocaleDateString() } catch (e) { return '' }
 }
 
-function statusClass(s, isCurrent) {
+function statusClass(s, isCurrent, completedStatuses) {
   if (s.running) return 'running'
   if (s.pendingInteraction) return 'pending'
-  if (s.completed && !isCurrent) return 'done'
+  if ((s.completed || completedStatuses[s.id]) && !isCurrent) return 'done'
   return 'idle'
 }
 
@@ -66,6 +93,10 @@ export function ZoneBrowser(props) {
   const storeState = React.useState(readStore)
   const store = storeState[0]
   const setStore = storeState[1]
+  const completedState = React.useState(readCompletedStatuses)
+  const completedStatuses = completedState[0]
+  const setCompletedStatuses = completedState[1]
+  const previousLiveStatus = React.useRef({})
   const queryState = React.useState('')
   const query = queryState[0]
   const setQuery = queryState[1]
@@ -84,6 +115,35 @@ export function ZoneBrowser(props) {
   const currentId = listState ? listState.current : undefined
   const wsItems = wsState ? (wsState.items || []) : []
   const archivedSessionArr = wsState ? (wsState.archivedSessionIds || []) : []
+
+  React.useEffect(() => {
+    const next = Object.assign({}, completedStatuses)
+    let changed = false
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i]
+      const s = byId[id]
+      if (!s) continue
+      const running = !!s.running
+      const pending = !!s.pendingInteraction
+      const previous = previousLiveStatus.current[id]
+      if (running || pending) {
+        if (next[id]) {
+          delete next[id]
+          changed = true
+        }
+      } else if (s.completed || (previous && (previous.running || previous.pending))) {
+        if (!next[id]) {
+          next[id] = true
+          changed = true
+        }
+      }
+      previousLiveStatus.current[id] = { running: running, pending: pending }
+    }
+    if (changed) {
+      setCompletedStatuses(next)
+      writeCompletedStatuses(next)
+    }
+  }, [ids, byId, completedStatuses])
 
   const archivedSessionSet = {}
   for (let i = 0; i < archivedSessionArr.length; i++) archivedSessionSet[archivedSessionArr[i]] = true
@@ -291,7 +351,7 @@ export function ZoneBrowser(props) {
   const renderSession = (s) => {
     const isCurrent = s.id === currentId
     return React.createElement('div', { key: s.id, className: 'wz-row' + (isCurrent ? ' wz-row-current' : ''), onClick: () => open(s.id) },
-      React.createElement('span', { className: 'wz-dot wz-dot-' + statusClass(s, isCurrent) }),
+      React.createElement('span', { className: 'wz-dot wz-dot-' + statusClass(s, isCurrent, completedStatuses) }),
       React.createElement('span', { className: 'wz-title', title: s.displayTitle }, s.displayTitle),
       React.createElement('span', { className: 'wz-time' }, timeAgo(s.updatedAt)),
       React.createElement('button', { type: 'button', className: 'wz-dots', title: '更多', onClick: (e) => openMenu(e, sessionMenu(s)) }, '⋯'),
