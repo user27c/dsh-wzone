@@ -96,7 +96,7 @@ export function ZoneBrowser(props) {
   const completedState = React.useState(readCompletedStatuses)
   const completedStatuses = completedState[0]
   const setCompletedStatuses = completedState[1]
-  const previousLiveStatus = React.useRef({})
+  const acknowledgedCompleted = React.useRef({})
   const queryState = React.useState('')
   const query = queryState[0]
   const setQuery = queryState[1]
@@ -125,25 +125,24 @@ export function ZoneBrowser(props) {
       if (!s) continue
       const running = !!s.running
       const pending = !!s.pendingInteraction
-      const previous = previousLiveStatus.current[id]
       if (running || pending) {
+        delete acknowledgedCompleted.current[id]
         if (next[id]) {
           delete next[id]
           changed = true
         }
-      } else if (s.completed || (previous && (previous.running || previous.pending))) {
+      } else if (s.completed && id !== currentId && !acknowledgedCompleted.current[id]) {
         if (!next[id]) {
           next[id] = true
           changed = true
         }
       }
-      previousLiveStatus.current[id] = { running: running, pending: pending }
     }
     if (changed) {
       setCompletedStatuses(next)
       writeCompletedStatuses(next)
     }
-  }, [ids, byId, completedStatuses])
+  }, [ids, byId, currentId, completedStatuses])
 
   const archivedSessionSet = {}
   for (let i = 0; i < archivedSessionArr.length; i++) archivedSessionSet[archivedSessionArr[i]] = true
@@ -194,7 +193,24 @@ export function ZoneBrowser(props) {
   })
   const isPinned = (wsId) => store.pinned.indexOf(wsId) >= 0
 
-  const open = (id) => { if (sessions && typeof sessions.open === 'function') sessions.open(id) }
+  const acknowledgeCompleted = (id) => {
+    const s = byId[id]
+    if (!completedStatuses[id] && !(s && s.completed)) return
+    acknowledgedCompleted.current[id] = true
+    if (!completedStatuses[id]) return
+    const next = Object.assign({}, completedStatuses)
+    delete next[id]
+    setCompletedStatuses(next)
+    writeCompletedStatuses(next)
+  }
+  const open = (id) => {
+    acknowledgeCompleted(id)
+    if (sessions && typeof sessions.open === 'function') sessions.open(id)
+  }
+
+  React.useEffect(() => {
+    if (currentId) acknowledgeCompleted(currentId)
+  }, [currentId, byId, completedStatuses])
   const newSession = (wsId) => { if (workspaces && typeof workspaces.startSession === 'function') workspaces.startSession(wsId) }
   const archiveSession = (id) => { if (workspaces && typeof workspaces.archiveSession === 'function') workspaces.archiveSession(id) }
   const forkSession = (id) => {
