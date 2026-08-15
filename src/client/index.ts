@@ -41,9 +41,9 @@ const CSS = `
 .wz-row:hover{background:var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,.08))}
 .wz-row-current{background:var(--dsw-alias-interactive-bg-active,rgba(127,127,127,.12))}
 .wz-dot{width:7px;height:7px;border-radius:50%;flex:none;background:var(--dsw-alias-label-secondary,#999)}
-.wz-dot-running{background:var(--dsw-alias-brand-primary,#2563eb)}
-.wz-dot-pending{background:var(--dsw-alias-state-warn-primary,#f59e0b)}
-.wz-dot-done{background:var(--dsw-alias-state-success-primary,#22c55e)}
+.wz-dot-running{background:var(--dsw-alias-state-success-primary,#22c55e)}
+.wz-dot-pending{background:var(--dsw-alias-state-error-primary,#e11d48)}
+.wz-dot-done{background:var(--dsw-alias-state-warn-primary,#f59e0b)}
 .wz-title{flex:1;min-width:0;font-size:13px;color:var(--dsw-alias-label-primary,#111);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wz-time{flex:none;font-size:10px;color:var(--dsw-alias-label-secondary,#999)}
 .wz-dots{flex:none;appearance:none;border:none;background:transparent;color:var(--dsw-alias-label-secondary,#666);font-size:15px;line-height:1;width:22px;height:22px;cursor:pointer;border-radius:6px;padding:0;display:flex;align-items:center;justify-content:center}
