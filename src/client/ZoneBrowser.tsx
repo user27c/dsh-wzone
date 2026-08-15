@@ -42,10 +42,10 @@ function timeAgo(ts) {
   try { return new Date(ts).toLocaleDateString() } catch (e) { return '' }
 }
 
-function statusClass(s) {
+function statusClass(s, isCurrent) {
   if (s.running) return 'running'
   if (s.pendingInteraction) return 'pending'
-  if (s.completed) return 'done'
+  if (s.completed && !isCurrent) return 'done'
   return 'idle'
 }
 
@@ -291,7 +291,7 @@ export function ZoneBrowser(props) {
   const renderSession = (s) => {
     const isCurrent = s.id === currentId
     return React.createElement('div', { key: s.id, className: 'wz-row' + (isCurrent ? ' wz-row-current' : ''), onClick: () => open(s.id) },
-      React.createElement('span', { className: 'wz-dot wz-dot-' + statusClass(s) }),
+      React.createElement('span', { className: 'wz-dot wz-dot-' + statusClass(s, isCurrent) }),
       React.createElement('span', { className: 'wz-title', title: s.displayTitle }, s.displayTitle),
       React.createElement('span', { className: 'wz-time' }, timeAgo(s.updatedAt)),
       React.createElement('button', { type: 'button', className: 'wz-dots', title: '更多', onClick: (e) => openMenu(e, sessionMenu(s)) }, '⋯'),
